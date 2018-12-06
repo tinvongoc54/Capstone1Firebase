@@ -23,7 +23,7 @@ import java.util.Map;
 
 public class Update_All_Table_Insert extends AppCompatActivity {
     EditText editTextInsertTable;
-    Button buttonInsertTableConfirm,buttonInsertTableCancel;
+    Button buttonInsertTableConfirm,buttonInsertTableCancel, buttonBack;
 
     MainActivity mainActivity = new MainActivity();
     String urlInsertTable= mainActivity.urlIPAddress + "/GraceCoffee/insertTable.php";
@@ -39,19 +39,27 @@ public class Update_All_Table_Insert extends AppCompatActivity {
         editTextInsertTable=findViewById(R.id.edittext_number_table);
         buttonInsertTableConfirm=findViewById(R.id.button_table_update_insert_confirm);
         buttonInsertTableCancel=findViewById(R.id.button_table_update_insert_cancel);
+        buttonBack = findViewById(R.id.buttonBack);
+
     }
 
     void XuLySuKien(){
-    buttonInsertTableConfirm.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            String numberTable=editTextInsertTable.getText().toString().trim();
-            if(numberTable.isEmpty()){
-                Toast.makeText(Update_All_Table_Insert.this, "Không có gì cả", Toast.LENGTH_SHORT).show();
+        buttonInsertTableConfirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String numberTable=editTextInsertTable.getText().toString().trim();
+                if(numberTable.isEmpty()){
+                    Toast.makeText(Update_All_Table_Insert.this, "Không có gì cả", Toast.LENGTH_SHORT).show();
+                }
+                else InsertTable(urlInsertTable);
             }
-            else InsertTable(urlInsertTable);
-        }
-    });
+        });
+        buttonBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Update_All_Table_Insert.this, Update_All_Table.class));
+            }
+        });
     }
     private void InsertTable(String url){
         RequestQueue requestQueue= Volley.newRequestQueue(this);

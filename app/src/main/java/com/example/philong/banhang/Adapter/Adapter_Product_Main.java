@@ -64,25 +64,6 @@ public class Adapter_Product_Main extends RecyclerView.Adapter<Adapter_Product_M
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             }
         });
-
-//        holder.txtName.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Product product=ProductArrayList.get(position);
-//
-//                String product_name = product.getProduct_name();
-//                String product_description = product.getProduct_description();
-//                String category_name = product.getCategory_name();
-//                String product_price = product.getProduct_price();
-//
-//                Intent intent = new Intent("intent_tenmon");
-//                intent.putExtra("category", category_name);
-//                intent.putExtra("name", product_name);
-//                intent.putExtra("description", product_description );
-//                intent.putExtra("price", product_price);
-//                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-//            }
-//        });
     }
 
     @Override

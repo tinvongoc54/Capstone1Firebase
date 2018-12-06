@@ -20,17 +20,21 @@ import com.example.philong.banhang.Objects.Product;
 import com.example.philong.banhang.Objects.Table;
 import com.example.philong.banhang.R;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 
 public class Adapter_Table extends RecyclerView.Adapter<Adapter_Table.ViewHolder>{
     ArrayList<Table> menuUpdatesTableArrayList;
     Context context;
     MainActivity mainActivityClass;
+    TextView textViewNumberTable;
 
-    public Adapter_Table(ArrayList<Table> menuUpdatesTableArrayList, Context context, MainActivity mainActivityClass) {
+    public Adapter_Table(ArrayList<Table> menuUpdatesTableArrayList, Context context, MainActivity mainActivityClass, TextView textViewNumberTable) {
         this.menuUpdatesTableArrayList = menuUpdatesTableArrayList;
         this.context = context;
         this.mainActivityClass = mainActivityClass;
+        this.textViewNumberTable = textViewNumberTable;
     }
 
     @Override
@@ -41,21 +45,27 @@ public class Adapter_Table extends RecyclerView.Adapter<Adapter_Table.ViewHolder
         return viewHolder;
     }
 
+
+    static int oldPosition = 0;
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
 
-        holder.textViewTable.setText(menuUpdatesTableArrayList.get(position).getName());
-        //su ly mau icon table
         final Drawable notfree = ContextCompat.getDrawable(mainActivityClass,R.drawable.coffeetable);
         final Drawable free=ContextCompat.getDrawable(mainActivityClass,R.drawable.coffeetable1);
+        holder.textViewTable.setText(menuUpdatesTableArrayList.get(position).getName());
+
+        //xu ly mau icon table
         holder.txtNameTable.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
+
+
                 holder.txtNameTable.setBackground(notfree);
+                textViewNumberTable.setText(menuUpdatesTableArrayList.get(position).getName());
 
-                mainActivityClass.textViewNumberTable.setText(menuUpdatesTableArrayList.get(position).getName());
-
+//                mainActivityClass.textViewNumberTable.setText(menuUpdatesTableArrayList.get(position).getName());
+//                oldPosition = position;
             }
         });
     }

@@ -48,11 +48,13 @@ import com.example.philong.banhang.Objects.Product;
 import com.example.philong.banhang.Objects.Product_Bill;
 import com.example.philong.banhang.Objects.Promotion;
 import com.example.philong.banhang.Objects.Table;
+
 import com.example.philong.banhang.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.nex3z.notificationbadge.NotificationBadge;
 
@@ -60,9 +62,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Map;
@@ -92,20 +96,21 @@ public class MainActivity extends AppCompatActivity  {
         DatabaseReference myRefPromotion = myRef.child("promotion");
 
         static int count_notification = 0;
+        static int count_stt = 1;
         static int count_category_quantity = 0;
         static int count_product_quantity = 0;
         static int billNumberOfDay = 0;
 
         final Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        SimpleDateFormat dfH = new SimpleDateFormat("HH:mm");
+        SimpleDateFormat df = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+        SimpleDateFormat dfH = new SimpleDateFormat("HH:mm:ss");
 
 
         //khai báo thuộc tính con
-        public TextView txt_get_time,textViewNumberTable, textViewTotal, textViewThanhTien, textViewStaff;
-        public EditText editTextPercent, editTextPromotion;
+        public TextView txt_get_time,textViewNumberTable, textViewTotal, textViewThanhTien, textViewStaff, textViewStatus;
+        public EditText editTextPercent, editTextPromotion, editTextGhiChu;
         Button btn_update_menu, btn_exit;
-        Button buttonMainPrint;
+        Button buttonMainPrint, buttonManagement;
         NotificationBadge notiBadge;
         Button createBill;
         Handler mHandler;
@@ -133,7 +138,8 @@ public class MainActivity extends AppCompatActivity  {
         Context context;
 
         static final int MESSAGE_THANH_TIEN = 1;
-    static final int MESSAGE_THANH_TIEN_2 = 2;
+        static final int MESSAGE_THANH_TIEN_2 = 2;
+        static final int MESSAGE_CHECK_ORDER_ONLINE = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,13 +156,13 @@ public class MainActivity extends AppCompatActivity  {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverCategory, new IntentFilter("intent_category"));
 
 
-        GetDataTable(urlGetDataTable);
+
         GetCategory(myRefCategory);
 
         SetupRecycerView();
 
         XuLyEvent();
-
+        timer();
     }
 
     public void CreateFirebase() {
@@ -213,6 +219,7 @@ public class MainActivity extends AppCompatActivity  {
                                 if (editTextPromotion.getText().toString().equalsIgnoreCase(proCode)) {
                                     msg.arg1 = Integer.parseInt(proDis);
                                     mHandler.sendMessage(msg); //gửi vào handler
+                                    break;
                                 }
                             }
                         }
@@ -227,6 +234,37 @@ public class MainActivity extends AppCompatActivity  {
                     mHandler.sendMessage(msg);
                 }
 
+            }
+        });
+        thread.start();
+    }
+
+    public void checkOrderOnline() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final Message msg1 = new Message();
+                msg1.what = MESSAGE_CHECK_ORDER_ONLINE; //tạo tên msg
+
+                myRefBill.limitToLast(1).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            String status = snapshot.child("status").getValue().toString();
+                            if (status.equals("1")) {
+                                msg1.arg1 = 1;
+                            } else {
+                                msg1.arg1 = 2;
+                            }
+                            mHandler.sendMessage(msg1); //gửi vào handler
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
         });
         thread.start();
@@ -247,11 +285,60 @@ public class MainActivity extends AppCompatActivity  {
                         } else {
                             textViewThanhTien.setText(String.valueOf(total - total*discount/100));
                         }
-
+                    case MESSAGE_CHECK_ORDER_ONLINE:
+//                        if (msg.arg1 == 2) {
+//                            notiBadge.setText(String.valueOf(++count_notification));
+//                            Toast.makeText(MainActivity.this, "number: " + count_notification, Toast.LENGTH_SHORT).show();
+//                        } else {
+////                            Toast.makeText(MainActivity.this, "time: "+df.format(calendar.getTime()), Toast.LENGTH_SHORT).show();
+//                        }
                 }
             }
         };
     }
+//    function decode(id) {
+//        id = id.substring(0, 8);
+//        var timestamp = 0;
+//        for (var i = 0; i < id.length; i++) {
+//            var c = id.charAt(i);
+//            timestamp = timestamp * 64 + PUSH_CHARS.indexOf(c);
+//        }
+//        return timestamp;
+//    }
+
+    //chuyển push key firebase về datetime
+    String PUSH_CHARS = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
+    public long change(String key) {
+        key = key.substring(0, 8);
+        long timestamp =0;
+        for (int i = 0; i < key.length(); i++) {
+            char c = key.charAt(i);
+            timestamp = timestamp * 64 + PUSH_CHARS.indexOf(c);
+        }
+        return timestamp;
+    }
+
+
+//    public void test() {
+//        myRefBill.limitToLast(1).addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+//                    String key = snapshot.getKey();
+//                    Timestamp ts = new Timestamp(change(key));
+//                    Date date = new Date(ts.getTime());
+//                    Log.d("checkTime2", String.valueOf(df.format(date)));
+//                }
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
+//    }
+
 
     public void anhXa(){
         //ánh xạ recyclerview
@@ -266,8 +353,11 @@ public class MainActivity extends AppCompatActivity  {
         textViewTotal = findViewById(R.id.text_view_toTal);
         textViewThanhTien = findViewById(R.id.text_view_thanhTien);
         textViewStaff = findViewById(R.id.textView_Staff);
+        textViewStatus = findViewById(R.id.text_view_status);
         editTextPercent = findViewById(R.id.editText_perCent);
         editTextPromotion = findViewById(R.id.editText_promotion);
+        editTextGhiChu = findViewById(R.id.editTextGhiChu);
+        txt_get_time.setText(df.format(calendar.getTime()));
 
         notiBadge = findViewById(R.id.btn_alerm);
         createBill = findViewById(R.id.btn_createBill);
@@ -276,10 +366,45 @@ public class MainActivity extends AppCompatActivity  {
         btn_exit=findViewById(R.id.button_exit);
         btn_update_menu=findViewById(R.id.btn_update_menu);
         buttonMainPrint=findViewById(R.id.button_main_print);
+        buttonManagement = findViewById(R.id.btn_management);
 
     }
 
+    public void timer() {
+        final String formattedDate = df.format(calendar.getTime());
+
+
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+//                txt_get_time.setText(String.valueOf(formattedDate));
+                GetDataTable(urlGetDataTable);
+//                checkOrderOnline();
+                mHandler.postDelayed(this,1000);
+            }
+        },1000);
+
+//        Timer timer=new Timer();
+//        timer.scheduleAtFixedRate(new TimerTask() {
+//            @Override
+//            public void run() {
+//                GetDataTable(urlGetDataTable);
+//
+////                txt_get_time.setText(String.valueOf(formattedDate));
+////                checkOrderOnline();
+//
+//            }
+//        },1000,10000);
+    }
+
     public void XuLyEvent(){
+        buttonManagement.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, QuanLyBillActivity.class));
+            }
+        });
+
         //xử lý tổng tiền thay đổi
         textViewTotal.addTextChangedListener(new TextWatcher() {
             @Override
@@ -354,18 +479,10 @@ public class MainActivity extends AppCompatActivity  {
 
 
         //xử lý event thời gian
-        String formattedDate = df.format(calendar.getTime());
-        txt_get_time.setText(String.valueOf(formattedDate));
+
 
         //event timer
-            Timer timer=new Timer();
-            timer.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    GetDataTable(urlGetDataTable);
 
-                }
-            },1000,10000);
 
         //xử lý button exit
         btn_exit.setOnClickListener(new View.OnClickListener() {
@@ -392,6 +509,10 @@ public class MainActivity extends AppCompatActivity  {
             public void onClick(View view) {
                 if ((!editTextPercent.getText().toString().equals("0")) && (!editTextPromotion.getText().toString().equals(""))) {
                     Toast.makeText(MainActivity.this, "Không áp dụng các khuyến mãi cùng 1 lúc!", Toast.LENGTH_SHORT).show();
+                } else if (textViewNumberTable.getText().toString().equalsIgnoreCase("Chưa chọn bàn")) {
+                    Toast.makeText(MainActivity.this, "Bạn chưa chọn bàn cần phục vụ!", Toast.LENGTH_SHORT).show();
+                } else if (arrayListBill.size() == 0) {
+                    Toast.makeText(MainActivity.this, "Chưa có sản phẩm nào trong hóa đơn!", Toast.LENGTH_SHORT).show();
                 } else {
                     ConfirmCreateBill();
                 }
@@ -416,6 +537,13 @@ public class MainActivity extends AppCompatActivity  {
             }
         });
 
+        buttonMainPrint.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newBill();
+            }
+        });
+
     }
 
     void SetupRecycerView(){
@@ -435,7 +563,7 @@ public class MainActivity extends AppCompatActivity  {
         recyclerView_table.setLayoutManager(recyclerViewLayoutManager);
 
         //Setup gán adapter cho recycler table
-        adapter_table=new Adapter_Table(tableArrayList,getApplicationContext(),this);
+        adapter_table=new Adapter_Table(tableArrayList,getApplicationContext(),this, textViewNumberTable);
         recyclerView_table.setAdapter(adapter_table);
 
 
@@ -563,63 +691,51 @@ public class MainActivity extends AppCompatActivity  {
         });
     }
 
-    public void GetLastItem(DatabaseReference myRef) {
-        myRef.orderByKey().limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Category category = snapshot.getValue(Category.class);
-                    Log.d("checkData1", snapshot.toString());
-                    Log.d("checkData2", snapshot.getValue().toString());
-                    Log.d("checkData3", category.getCatalog_name() + " - " + category.getCatalogs_des());
-                }
-
-
-//                Toast.makeText(MainActivity.this, "name " + category.getCatalog_name() , Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-
     String code = "";
     String discount = "";
-    String type = "";
+    String type = "VNĐ";
     //Insert bill lên firebase
     public void CreateBill(final DatabaseReference myRef) {
         final String key = myRef.push().getKey();
 
-        String formattedDate = df.format(calendar.getTime());
+        String bill_note = editTextGhiChu.getText().toString();
+        //lấy time hiện tại
+        Timestamp ts = new Timestamp(change(key));
+        Date date = new Date(ts.getTime());
+        String formattedDate = df.format(date);
 
-//        String date = calendar.get(Calendar.DAY_OF_MONTH) + "/" + (calendar.get(Calendar.MONTH) + 1) + "/" +calendar.get(Calendar.YEAR);
-        String bill_number = calendar.get(Calendar.DAY_OF_MONTH) + "" + (calendar.get(Calendar.MONTH) + 1) + "" +calendar.get(Calendar.YEAR) + String.valueOf(++billNumberOfDay);
-        String amount = textViewThanhTien.getText().toString();
+        String price_after_promotion = textViewThanhTien.getText().toString();
 
         String total = textViewTotal.getText().toString();
-        Bill bill = new Bill(amount, bill_number, "Khoa", formattedDate, textViewStaff.getText().toString(), "1", textViewNumberTable.getText().toString(), total);
+        Bill bill = new Bill(bill_note, formattedDate, textViewStaff.getText().toString(), "1", textViewNumberTable.getText().toString(), total, price_after_promotion);
 
         myRef.child(key).setValue(bill);
+
+        //set giá trị customer
+        myRef.child(key).child("customer").child("email").setValue("");
+        myRef.child(key).child("customer").child("name").setValue("");
+        myRef.child(key).child("customer").child("phone").setValue("");
 
         //set value promotion
         final String promotionCode = editTextPromotion.getText().toString();
         if (editTextPromotion.getText().toString().equals("")) {
+            myRef.child(key).child("promotion").child("promotion_code").setValue("");
             if (discount.equals("0")) {
 //                promotion = new Promotion("", "0", "")
                 discount = "0";
-                Log.d("check1", "con cec");
             } else {
 //                promotion = new Promotion("", discount, "%");
                 discount = editTextPercent.getText().toString();
                 type = "%";
             }
+            myRef.child(key).child("promotion").child("promotion_discount").setValue(discount);
+            myRef.child(key).child("promotion").child("promotion_type").setValue(type);
+
         } else {
             myRefPromotion.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
+                    boolean check = false;
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         code = snapshot.child("promotion_code").getValue().toString();
                         discount = snapshot.child("promotion_discount").getValue().toString();
@@ -629,8 +745,14 @@ public class MainActivity extends AppCompatActivity  {
                             myRef.child(key).child("promotion").child("promotion_code").setValue(code);
                             myRef.child(key).child("promotion").child("promotion_discount").setValue(discount);
                             myRef.child(key).child("promotion").child("promotion_type").setValue(type);
+                            check = true;
                         }
                         break;
+                    }
+                    if (check == false) {
+                        myRef.child(key).child("promotion").child("promotion_code").setValue("");
+                        myRef.child(key).child("promotion").child("promotion_discount").setValue("0");
+                        myRef.child(key).child("promotion").child("promotion_type").setValue("VNĐ");
                     }
 //                    promotion = new Promotion(promotion_code, promotion_discount, promotion_type);
                 }
@@ -641,8 +763,6 @@ public class MainActivity extends AppCompatActivity  {
                 }
             });
         }
-        Log.d("checkPro", promotionCode);
-
 
         //set value bill_detail
         Map<String, Object> myMap = new HashMap<String, Object>();
@@ -659,6 +779,8 @@ public class MainActivity extends AppCompatActivity  {
 
     //Xác nhận tạo bill
     public void ConfirmCreateBill() {
+
+
         final Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_confirm_createbill);
         dialog.setCanceledOnTouchOutside(false);
@@ -708,16 +830,9 @@ public class MainActivity extends AppCompatActivity  {
                         Toast.makeText(MainActivity.this, "Tiền khách đưa phải lớn hơn tổng tiền!", Toast.LENGTH_SHORT).show();
                     } else {
                         textview_TienThua.setText(String.valueOf(TKD - TT));
-
-                        notiBadge.setNumber(++count_notification);
                         CreateBill(myRefBill);
                         dialog.dismiss();
-
-                        arrayListBill.clear();
-                        menu_adapter_update_bill.notifyDataSetChanged();
-                        textViewNumberTable.setText("Chưa chọn bàn");
-                        textViewTotal.setText("0");
-                        textViewThanhTien.setText("0");
+                        newBill();
                     }
 
 
@@ -730,17 +845,9 @@ public class MainActivity extends AppCompatActivity  {
         buttonXacNhan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                notiBadge.setNumber(++count_notification);
                 CreateBill(myRefBill);
                 dialog.dismiss();
-
-                arrayListBill.clear();
-                menu_adapter_update_bill.notifyDataSetChanged();
-                textViewNumberTable.setText("Chưa chọn bàn");
-                textViewTotal.setText("0");
-                editTextPercent.setText("0");
-                editTextPromotion.setText("");
-                textViewThanhTien.setText("0");
+                newBill();
             }
         });
 
@@ -792,22 +899,32 @@ public class MainActivity extends AppCompatActivity  {
         popupMenu.inflate(R.menu.popup_menu_list_bill);
         popupMenu.show();
         final ArrayList<String> arrayListKey = new ArrayList<>();
-        myRefBill.orderByKey().limitToLast(5).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren())  {
-                    arrayListKey.add(snapshot.getKey());
-                    String bill_number = snapshot.child("bill_number").getValue().toString();
-                    String[] time = snapshot.child("date_create").getValue().toString().split(" ");
-                    popupMenu.getMenu().add(0, arrayListKey.size(), 0, "HĐ: " + bill_number + " - " + time[1]);
+
+        int i=1;
+        while (i<=5) {
+            myRefBill.orderByKey().limitToLast(i).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren())  {
+                        arrayListKey.add(snapshot.getKey());
+
+                        String[] time = snapshot.child("date_create").getValue().toString().split(" ");
+                        String[] date = time[0].split("-");
+                        String billnumber = date[0] + date[1] + date[2];
+                        popupMenu.getMenu().add(0, arrayListKey.size(), 0, "HĐ: " + billnumber + " - " + time[1]);
+                        break;
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
+                }
+            });
+            i++;
+        }
+
+
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
@@ -833,24 +950,48 @@ public class MainActivity extends AppCompatActivity  {
         });
     }
 
+    static String customer_name = "";
+    static String customer_phone = "";
+    static String customer_email = "";
+    static String ghichu = "";
     public void getItemPopupMenu(final String key) {
-        buttonMainPrint.setText("Cập nhật");
+        buttonMainPrint.setText("Xác nhận");
         createBill.setText("Thoát");
+        Timestamp ts = new Timestamp(change(key));
+        final Date date = new Date(ts.getTime());
 
         //Lấy dữ liệu của bill đc chọn
         myRefBill.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                txt_get_time.setText(dataSnapshot.child("date_create").getValue().toString());
-                textViewNumberTable.setText(dataSnapshot.child("table").getValue().toString());
-                textViewTotal.setText(dataSnapshot.child("total").getValue().toString());
+
+                txt_get_time.setText(df.format(date));
+                if (dataSnapshot.child("table").getValue().toString().equalsIgnoreCase("null")) {
+                    textViewNumberTable.setText("Order online");
+                } else {
+                    textViewNumberTable.setText(dataSnapshot.child("table").getValue().toString());
+                }
+
+                textViewTotal.setText(dataSnapshot.child("total_price").getValue().toString());
                 if (dataSnapshot.child("promotion").child("promotion_type").getValue().toString().equals("%")) {
                     editTextPercent.setText(dataSnapshot.child("promotion").child("promotion_discount").getValue().toString());
                 } else {
                     editTextPercent.setText("0");
                 }
+                if (dataSnapshot.child("status").getValue().toString().equals("0")) {
+                    textViewStatus.setText("Đang chờ xác nhận");
+                } else {
+                    textViewStatus.setText("Đã xác nhận");
+                }
                 editTextPromotion.setText(dataSnapshot.child("promotion").child("promotion_code").getValue().toString());
-                textViewThanhTien.setText(dataSnapshot.child("amount").getValue().toString());
+                textViewThanhTien.setText(dataSnapshot.child("total_price_after_promotion").getValue().toString());
+                editTextGhiChu.setText(dataSnapshot.child("bill_note").getValue().toString());
+
+                customer_name = dataSnapshot.child("customer").child("name").getValue().toString();
+                customer_phone = dataSnapshot.child("customer").child("phone").getValue().toString();
+                customer_email = dataSnapshot.child("customer").child("email").getValue().toString();
+
+
 
                 arrayListBill.clear();
                 readBillDetail(key);
@@ -862,32 +1003,107 @@ public class MainActivity extends AppCompatActivity  {
             }
         });
 
+        //Khi bấm nút Xác nhận thì sẽ hiện dialog thông tin KH
+        buttonMainPrint.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                XacNhanBillOnline(key);
+            }
+        });
+
         //Khi bấm button Thoát thì sẽ về như ban đầu
         createBill.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                createBill.setText("Lưu");
-                buttonMainPrint.setText("In");
-                txt_get_time.setText(df.format(calendar.getTime()));
-                textViewNumberTable.setText("Chưa chọn bàn");
-                textViewTotal.setText("0");
-                editTextPercent.setText("0");
-                editTextPromotion.setText("");
-                textViewThanhTien.setText("0");
-                arrayListBill.clear();
-                menu_adapter_update_bill.notifyDataSetChanged();
-                createBill.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if ((!editTextPercent.getText().toString().equals("0")) && (!editTextPromotion.getText().toString().equals(""))) {
-                            Toast.makeText(MainActivity.this, "Không được áp dụng các khuyến mãi cùng 1 lúc!", Toast.LENGTH_SHORT).show();
-                        } else {
-                            ConfirmCreateBill();
-                        }
-                    }
-                });
+                ThoatBillOnline();
             }
         });
+    }
+
+    public void XacNhanBillOnline(final String key) {
+        final Dialog dialog = new Dialog(MainActivity.this);
+        dialog.setContentView(R.layout.dialog_thong_tin_khach_hang);
+
+        TextView textViewTenKH = dialog.findViewById(R.id.textViewTenKH);
+        TextView textViewSDT = dialog.findViewById(R.id.textViewSDT);
+        TextView textViewEmail = dialog.findViewById(R.id.textViewEmail);
+        TextView textViewGhiChu = dialog.findViewById(R.id.textViewGhiChu);
+
+        Button buttonXacNhan = dialog.findViewById(R.id.buttonXacNhanDialog);
+        Button buttonQuayLai = dialog.findViewById(R.id.buttonQuayLaiDialog);
+
+        textViewTenKH.setText(customer_name);
+        textViewSDT.setText(customer_phone);
+        textViewEmail.setText(customer_email);
+        textViewGhiChu.setText(ghichu);
+
+
+        buttonXacNhan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if ((!editTextPercent.getText().toString().equals("0")) && (!editTextPromotion.getText().toString().equals(""))) {
+                    Toast.makeText(MainActivity.this, "Không được áp dụng các khuyến mãi cùng 1 lúc!", Toast.LENGTH_SHORT).show();
+                } else if (textViewStatus.getText().toString().equalsIgnoreCase("Đã xác nhận")) {
+                    Toast.makeText(MainActivity.this, "Đơn đã được xác nhận!", Toast.LENGTH_SHORT).show();
+                } else {
+                    ConfirmCreateOnlineBill(key);
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        buttonQuayLai.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+    }
+
+    public void ThoatBillOnline() {
+        createBill.setText("Thanh toán");
+        buttonMainPrint.setText("Tạo mới");
+        newBill();
+        createBill.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if ((!editTextPercent.getText().toString().equals("0")) && (!editTextPromotion.getText().toString().equals(""))) {
+                    Toast.makeText(MainActivity.this, "Không được áp dụng các khuyến mãi cùng 1 lúc!", Toast.LENGTH_SHORT).show();
+                } else if (textViewNumberTable.getText().toString().equalsIgnoreCase("Chưa chọn bàn")) {
+                    Toast.makeText(MainActivity.this, "Bạn chưa chọn bàn cần phục vụ!", Toast.LENGTH_SHORT).show();
+                } else if (arrayListBill.size() == 0) {
+                    Toast.makeText(MainActivity.this, "Chưa có sản phẩm nào trong hóa đơn!", Toast.LENGTH_SHORT).show();
+                } else {
+                    ConfirmCreateBill();
+                }
+            }
+        });
+
+        buttonMainPrint.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newBill();
+            }
+        });
+    }
+
+    public void ConfirmCreateOnlineBill(String key) {
+        myRefBill.child(key).child("status").setValue("1");
+        newBill();
+    }
+
+    public void newBill() {
+        txt_get_time.setText(df.format(calendar.getTime()));
+        textViewNumberTable.setText("Chưa chọn bàn");
+        textViewStatus.setText("Đang phục vụ");
+        arrayListBill.clear();
+        menu_adapter_update_bill.notifyDataSetChanged();
+        textViewTotal.setText("0");
+        textViewThanhTien.setText("0");
+        editTextPercent.setText("0");
+        editTextPromotion.setText("");
+        editTextGhiChu.setText("");
     }
 
     public void readBillDetail(String key) {

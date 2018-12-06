@@ -39,7 +39,7 @@ public class Update_All_Table extends AppCompatActivity {
 
     RecyclerView recyclerviewAddTable;
 
-    Button buttonInsertTable;
+    Button buttonInsertTable, buttonBack;
 
     MainActivity mainActivity = new MainActivity();
     String urlDeleteDataTable = mainActivity.urlIPAddress + "/GraceCoffee/deleteTable.php";
@@ -58,15 +58,22 @@ public class Update_All_Table extends AppCompatActivity {
     void AnhXa(){
         buttonInsertTable=findViewById(R.id.button_update_table_add);
         recyclerviewAddTable=findViewById(R.id.recycler_view_add_table);
+        buttonBack = findViewById(R.id.buttonBack);
     }
 
     void XuLySuKien(){
-    buttonInsertTable.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            startActivity(new Intent(Update_All_Table.this,Update_All_Table_Insert.class));
-        }
-    });
+        buttonInsertTable.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Update_All_Table.this,Update_All_Table_Insert.class));
+            }
+        });
+        buttonBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Update_All_Table.this, Update_All.class));
+            }
+        });
     }
 
 

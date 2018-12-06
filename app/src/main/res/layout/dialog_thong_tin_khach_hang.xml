@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_margin="10dp"
+        android:textSize="25sp"
+        android:text="Tên khách hàng : "
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/textViewTenKH"
+        android:layout_toRightOf="@+id/textView1"
+        android:layout_margin="10dp"
+        android:textSize="25sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_below="@+id/textView1"
+        android:layout_margin="10dp"
+        android:textSize="25sp"
+        android:text="Số điện thoại      : "
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/textViewSDT"
+        android:layout_below="@+id/textViewTenKH"
+        android:layout_toRightOf="@+id/textView2"
+        android:textSize="25sp"
+        android:inputType="number"
+        android:layout_margin="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_below="@id/textView2"
+        android:textSize="25sp"
+        android:layout_margin="10dp"
+        android:text="Email                    : "
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/textViewEmail"
+        android:layout_toRightOf="@+id/textView3"
+        android:layout_below="@id/textViewSDT"
+        android:textSize="25sp"
+        android:layout_margin="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_below="@id/textView3"
+        android:textSize="25sp"
+        android:layout_margin="10dp"
+        android:text="Ghi chú                 : "
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/textViewGhiChu"
+        android:layout_toRightOf="@+id/textView4"
+        android:layout_below="@id/textViewEmail"
+        android:textSize="25sp"
+        android:layout_margin="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/buttonXacNhanDialog"
+        android:layout_below="@+id/textViewGhiChu"
+        android:layout_margin="10dp"
+        android:text="Xác nhận"
+        android:textSize="20sp"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/buttonQuayLaiDialog"
+        android:layout_below="@+id/textViewGhiChu"
+        android:layout_alignParentRight="true"
+        android:layout_margin="10dp"
+        android:text="Quay lại"
+        android:textSize="20sp"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"/>
+
+</RelativeLayout>

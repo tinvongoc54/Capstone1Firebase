@@ -10,7 +10,7 @@ import com.example.philong.banhang.R;
 
 public class Update_All extends AppCompatActivity {
     //khai bao cac nut
-    Button buttonUpdateMenu,buttonUpdateTable,butonUpdateEmployee;
+    Button buttonUpdateMenu,buttonUpdateTable,butonUpdateEmployee, buttonBack;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,14 +23,15 @@ public class Update_All extends AppCompatActivity {
         buttonUpdateMenu=findViewById(R.id.button_update_menu);
         buttonUpdateTable=findViewById(R.id.button_update_table);
         butonUpdateEmployee=findViewById(R.id.button_update_employee);
+        buttonBack = findViewById(R.id.buttonBack);
     }
     void XuLyEvent(){
-//        buttonUpdateMenu.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                startActivity(new Intent(Update_All.this,Update_All_Product.class));
-//            }
-//        });
+        buttonUpdateMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Update_All.this,Update_All_Product.class));
+            }
+        });
 
         buttonUpdateTable.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -46,6 +47,12 @@ public class Update_All extends AppCompatActivity {
             }
         });
 
+        buttonBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Update_All.this, MainActivity.class));
+            }
+        });
     }
 
 }

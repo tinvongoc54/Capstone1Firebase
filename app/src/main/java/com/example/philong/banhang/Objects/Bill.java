@@ -1,51 +1,41 @@
 package com.example.philong.banhang.Objects;
 
 public class Bill {
-    private String amount;
-    private String bill_number;
-    private String customer;
+    private String bill_note;
     private String date_create;
     private String staff_create;
     private String status;
     private String table;
-    private String total;
+    private String total_price;
+    private String total_price_after_promotion;
 
     public Bill() {
     }
 
-    public Bill(String amount, String bill_number, String customer, String date_create, String staff_create, String status, String table, String total) {
-        this.amount = amount;
-        this.bill_number = bill_number;
-        this.customer = customer;
+    public Bill(String bill_note, String date_create, String staff_create, String status, String table, String total_price, String total_price_after_promotion) {
+        this.bill_note = bill_note;
         this.date_create = date_create;
         this.staff_create = staff_create;
         this.status = status;
         this.table = table;
-        this.total = total;
+        this.total_price = total_price;
+        this.total_price_after_promotion = total_price_after_promotion;
     }
 
-    public String getAmount() {
-        return amount;
+    public Bill(String bill_note, String date_create, String staff_create, String status, String total_price_after_promotion) {
+        this.bill_note = bill_note;
+        this.date_create = date_create;
+        this.staff_create = staff_create;
+        this.status = status;
+        this.total_price_after_promotion = total_price_after_promotion;
     }
 
-    public void setAmount(String amount) {
-        this.amount = amount;
+    public String getBill_note() {
+        return bill_note;
     }
 
-    public String getBill_number() {
-        return bill_number;
-    }
-
-    public void setBill_number(String bill_number) {
-        this.bill_number = bill_number;
-    }
-
-    public String getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(String customer) {
-        this.customer = customer;
+    public void setBill_note(String bill_note) {
+        this.bill_note = bill_note;
     }
 
     public String getDate_create() {
@@ -80,11 +70,19 @@ public class Bill {
         this.table = table;
     }
 
-    public String getTotal() {
-        return total;
+    public String getTotal_price() {
+        return total_price;
     }
 
-    public void setTotal(String total) {
-        this.total = total;
+    public void setTotal_price(String total_price) {
+        this.total_price = total_price;
+    }
+
+    public String getTotal_price_after_promotion() {
+        return total_price_after_promotion;
+    }
+
+    public void setTotal_price_after_promotion(String total_price_after_promotion) {
+        this.total_price_after_promotion = total_price_after_promotion;
     }
 }

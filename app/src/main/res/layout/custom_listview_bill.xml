@@ -1,27 +1,165 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout android:layout_height="wrap_content"
     android:layout_width="match_parent"
+    android:id="@+id/relativeLayout"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <TextView
-        android:id="@+id/textViewBillNumber"
-        android:textSize="30sp"
+        android:id="@+id/textView1"
+        android:textSize="15sp"
         android:textStyle="bold"
-        android:textColor="#"
+        android:textColor="#000000"
+        android:text="HĐ: "
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/textViewBillNumber"
+        android:layout_toRightOf="@+id/textView1"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
         android:text="Hóa đơn 01"
-        android:layout_margin="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
         android:layout_width="400dp"
         android:layout_height="wrap_content"/>
     <TextView
         android:id="@+id/textViewDateCreate"
         android:layout_alignParentRight="true"
-        android:layout_margin="10dp"
+        android:textColor="#595959"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
         android:text="30/11/2018"
-        android:textSize="30dp"
+        android:textSize="15sp"
         android:textStyle="italic"
-        android:layout_width="300dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
     <TextView
-        android:layout_width="400dp"
+        android:id="@+id/textView2"
+        android:textColor="#595959"
+        android:layout_below="@+id/textViewBillNumber"
+        android:textSize="13sp"
+        android:text="Khách hàng: "
+        android:layout_marginLeft="10dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/textViewKhachHang"
+        android:textColor="#595959"
+        android:layout_below="@+id/textView1"
+        android:layout_toRightOf="@+id/textView2"
+        android:textSize="13sp"
+        android:layout_marginLeft="10dp"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content" />
+
+
+    <TextView
+        android:id="@+id/textView3"
+        android:textColor="#595959"
+        android:layout_below="@+id/textView1"
+        android:layout_toRightOf="@id/textViewKhachHang"
+        android:textSize="13sp"
+        android:text="Sđt: "
+        android:layout_marginLeft="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/textViewSDT"
+        android:textColor="#595959"
+        android:layout_toRightOf="@+id/textView3"
+        android:layout_below="@+id/textView1"
+        android:textSize="13sp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:textColor="#595959"
+        android:layout_below="@+id/textView2"
+        android:textSize="13sp"
+        android:text="Trạng thái: "
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/textViewTrangThai"
+        android:textColor="#595959"
+        android:layout_toRightOf="@+id/textView4"
+        android:layout_below="@+id/textView2"
+        android:textStyle="bold|italic"
+        android:textSize="13sp"
+        android:layout_marginRight="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:textColor="#595959"
+        android:layout_below="@+id/textView4"
+        android:textSize="13sp"
+        android:text="Nhân viên tạo: "
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/textViewNhanVien"
+        android:textColor="#595959"
+        android:layout_toRightOf="@+id/textView5"
+        android:layout_below="@+id/textView4"
+        android:textSize="13sp"
+        android:layout_marginRight="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:textColor="#595959"
+        android:layout_below="@+id/textView5"
+        android:layout_toLeftOf="@+id/textViewTongTien"
+        android:textSize="13sp"
+        android:text="Tổng tiền: "
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/textViewTongTien"
+        android:textColor="#595959"
+        android:layout_toLeftOf="@+id/textView7"
+        android:layout_below="@+id/textView5"
+        android:textStyle="bold|italic"
+        android:textSize="13sp"
+        android:text="100000"
+        android:layout_marginRight="5dp"
+        android:layout_marginBottom="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/textView7"
+        android:textColor="#595959"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/textView5"
+        android:textStyle="bold|italic"
+        android:textSize="13sp"
+        android:text="VNĐ"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 </RelativeLayout>

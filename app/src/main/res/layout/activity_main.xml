@@ -74,7 +74,6 @@
                 <Button
                     android:layout_gravity="center"
                     android:layout_weight="1.0"
-
                     android:background="@drawable/quanli"
                     android:id="@+id/btn_management"
                     android:layout_width="wrap_content"
@@ -322,7 +321,7 @@
     android:layout_height="match_parent">
     <LinearLayout
 
-        android:layout_weight="3.0"
+        android:layout_weight="2.0"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -550,8 +549,29 @@
             android:layout_marginLeft="5dp"
             android:text="VNĐ"
             android:textColor="#050505" />
-
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_weight="1.0"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="Ghi chú: "
+            android:textSize="12sp"
+            android:textColor="#050505"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/editTextGhiChu"
+            android:textSize="12sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
     <LinearLayout
         android:weightSum="2.0"
         android:layout_weight="2.0"
@@ -565,7 +585,7 @@
             android:layout_weight="1.0"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="In"
+            android:text="Tạo mới"
             android:background="@drawable/custom_button_bill"/>
         <Button
             android:layout_margin="10dp"
@@ -573,7 +593,7 @@
             android:layout_weight="1.0"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Lưu"
+            android:text="Thanh toán"
             android:background="@drawable/custom_button_bill" />
 
     </LinearLayout>

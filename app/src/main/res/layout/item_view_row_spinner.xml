@@ -8,20 +8,11 @@
     <TextView
         android:textColor="#f39"
         android:textSize="20dp"
-        android:id="@+id/textview_item_spinner_id"
-        android:text="11"
+        android:id="@+id/textview_item_spinner_ten"
+        android:text="Đồ ăn nhanh"
         android:gravity="left"
         android:layout_weight="1.0"
         android:layout_width="wrap_content"
         android:layout_height="match_parent" />
-    <TextView
-    android:textColor="#f39"
-    android:textSize="20dp"
-    android:id="@+id/textview_item_spinner_ten"
-    android:text="Đồ ăn nhanh"
-    android:gravity="left"
-    android:layout_weight="1.0"
-    android:layout_width="wrap_content"
-    android:layout_height="match_parent" />
 
 </LinearLayout>

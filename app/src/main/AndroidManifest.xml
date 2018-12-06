@@ -18,6 +18,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".Activity.LoginActivity" />
+        <activity android:name=".Activity.QuanLyBillActivity" />
         <activity android:name=".Activity.Update_All_Product" />
         <activity android:name=".Activity.Update_All_Product_Insert" />
         <activity android:name=".Activity.Update_All" />
