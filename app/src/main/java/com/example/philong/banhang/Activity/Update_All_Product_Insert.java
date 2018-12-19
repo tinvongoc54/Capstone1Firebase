@@ -44,12 +44,6 @@ import java.util.Map;
 
 public class Update_All_Product_Insert extends AppCompatActivity {
 
-
-    //khai bao url
-    MainActivity mainActivity = new MainActivity();
-    String urlCategory = mainActivity.urlIPAddress + "/GraceCoffee/getdataCategory.php";
-    String urlInsertProduct = mainActivity.urlIPAddress + "/GraceCoffee/insertProduct.php";
-
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference myRef = database.getReference("grace");
     DatabaseReference myRefCatalog = myRef.child("catalog");

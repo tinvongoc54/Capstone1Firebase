@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,35 +47,38 @@ public class Adapter_Update_Table extends RecyclerView.Adapter<Adapter_Update_Ta
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
 
-        holder.txtNameTable.setText(UpdatesTableArrayList.get(position).getName());
+        holder.txtNameTable.setText(UpdatesTableArrayList.get(position).getTable_name());
         holder.imageViewEditUpdateTable.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Table table=UpdatesTableArrayList.get(position);
-                Intent intent=new Intent(updateTableClass,Update_All_Table_Update.class);
-                intent.putExtra("soban",table);
-                updateTableClass.startActivity(intent);
+                Intent intent = new Intent("intent_bancansua");
+                intent.putExtra("ban", UpdatesTableArrayList.get(position).getTable_name());
+                intent.putExtra("mota", UpdatesTableArrayList.get(position).getTable_describe());
+                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             }
         });
         holder.imageViewEditDeleteTable.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                XacNhanXoa(UpdatesTableArrayList.get(position).getName(),UpdatesTableArrayList.get(position).getId());
+                XacNhanXoa(UpdatesTableArrayList.get(position).getTable_name(), position);
             }
         });
     }
 
-    private void XacNhanXoa(String soBan, final int id){
+    private void XacNhanXoa(final String name, final int vitrixoa){
 
         AlertDialog.Builder dialogxoa=new AlertDialog.Builder(updateTableClass);
-        dialogxoa.setMessage("Ban co muon xoa ban : "+soBan+" khong");
-        dialogxoa.setPositiveButton("Co", new DialogInterface.OnClickListener() {
+        dialogxoa.setMessage("Ban có muốn xóa "+ name +" không?");
+        dialogxoa.setPositiveButton("Có", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                updateTableClass.DeleteTable(id);
+                Intent intent = new Intent("intent_bancanxoa");
+                intent.putExtra("ban", name);
+                intent.putExtra("vitrixoa", vitrixoa);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             }
         });
-        dialogxoa.setNegativeButton("khong", new DialogInterface.OnClickListener() {
+        dialogxoa.setNegativeButton("Không", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 

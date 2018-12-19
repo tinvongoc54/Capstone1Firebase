@@ -52,17 +52,20 @@ public class Adapter_Table extends RecyclerView.Adapter<Adapter_Table.ViewHolder
 
         final Drawable notfree = ContextCompat.getDrawable(mainActivityClass,R.drawable.coffeetable);
         final Drawable free=ContextCompat.getDrawable(mainActivityClass,R.drawable.coffeetable1);
-        holder.textViewTable.setText(menuUpdatesTableArrayList.get(position).getName());
+        holder.textViewTable.setText(menuUpdatesTableArrayList.get(position).getTable_name());
 
         //xu ly mau icon table
         holder.txtNameTable.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (holder.txtNameTable.getBackground().equals(notfree)) {
+                    holder.txtNameTable.setBackground(free);
+                } else {
+                    holder.txtNameTable.setBackground(notfree);
+                    textViewNumberTable.setText(menuUpdatesTableArrayList.get(position).getTable_name());
+                }
 
 
-
-                holder.txtNameTable.setBackground(notfree);
-                textViewNumberTable.setText(menuUpdatesTableArrayList.get(position).getName());
 
 //                mainActivityClass.textViewNumberTable.setText(menuUpdatesTableArrayList.get(position).getName());
 //                oldPosition = position;

@@ -39,6 +39,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -49,7 +51,7 @@ public class QuanLyBillActivity extends AppCompatActivity {
     ArrayList<Bill_History> arrayListBillHistory = new ArrayList<>();
     Adapter_Bill_History adapter_bill_history;
 
-    Button buttonBack, buttonXacNhan, buttonThoat;
+    Button buttonBack, buttonXacNhan, buttonThoat, buttonThongKe, buttonUpdate;
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference myRef = database.getReference("grace");
@@ -166,6 +168,20 @@ public class QuanLyBillActivity extends AppCompatActivity {
     }
 
     private void XuLySuKien() {
+        buttonUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(QuanLyBillActivity.this, Update_All.class));
+            }
+        });
+
+        buttonThongKe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(QuanLyBillActivity.this, ThongKeActivity.class));
+            }
+        });
+
         buttonBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -287,6 +303,7 @@ public class QuanLyBillActivity extends AppCompatActivity {
 
     public void ConfirmCreateOnlineBill(String key) {
         myRefBill.child(key).child("status").setValue("1");
+        GetDataBill();
         newBill();
     }
 
@@ -320,6 +337,8 @@ public class QuanLyBillActivity extends AppCompatActivity {
 
         buttonXacNhan = findViewById(R.id.buttonXacNhan);
         buttonThoat = findViewById(R.id.buttonThoat);
+        buttonThongKe = findViewById(R.id.btn_statistical);
+        buttonUpdate = findViewById(R.id.btn_update_menu);
     }
 
     private void GetDataBill() {
@@ -421,13 +440,13 @@ public class QuanLyBillActivity extends AppCompatActivity {
                     textViewStatus.setText("Đã xác nhận");
                 }
                 editTextPromotion.setText(dataSnapshot.child("promotion").child("promotion_code").getValue().toString());
-                textViewThanhTien.setText(dataSnapshot.child("total_price_after_promotion").getValue().toString());
+                textViewThanhTien.setText(formatNumber(Integer.parseInt(dataSnapshot.child("total_price_after_promotion").getValue().toString())));
                 editTextGhiChu.setText(dataSnapshot.child("bill_note").getValue().toString());
 
                 customer_name = dataSnapshot.child("customer").child("name").getValue().toString();
                 customer_phone = dataSnapshot.child("customer").child("phone").getValue().toString();
                 customer_email = dataSnapshot.child("customer").child("email").getValue().toString();
-
+                ghichu = dataSnapshot.child("bill_note").getValue().toString();
 
 
                 arrayListBill.clear();
@@ -487,5 +506,19 @@ public class QuanLyBillActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    public static String formatNumber(int number) {
+        if (number < 1000) {
+            return String.valueOf(number);
+        }
+        try {
+            NumberFormat formatter = new DecimalFormat("###,###");
+            String resp = formatter.format(number);
+            resp = resp.replaceAll(",", ".");
+            return resp;
+        } catch (Exception e) {
+            return "";
+        }
     }
 }

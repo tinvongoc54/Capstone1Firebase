@@ -62,8 +62,6 @@ public class Update_All_Product_Update extends AppCompatActivity {
     String product_name = "";
     String product_price = "";
 
-
-
     private void ShowEditProduct() {
         Intent intent = getIntent();
         product_name = intent.getStringExtra("name");

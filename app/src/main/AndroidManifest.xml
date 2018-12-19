@@ -11,15 +11,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activity.MainActivity">
+        <activity android:name=".Activity.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activity.LoginActivity" />
+        <activity android:name=".Activity.MainActivity" />
         <activity android:name=".Activity.QuanLyBillActivity" />
+        <activity android:name=".Activity.ThongKeActivity" />
         <activity android:name=".Activity.Update_All_Product" />
         <activity android:name=".Activity.Update_All_Product_Insert" />
         <activity android:name=".Activity.Update_All" />

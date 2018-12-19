@@ -1,8 +1,11 @@
 package com.example.philong.banhang.Activity;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -58,47 +61,64 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        buttonLogin.setEnabled(false);
+//        buttonLogin.setEnabled(false);
 
-        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this,
-                R.style.Theme_AppCompat_DayNight_DarkActionBar);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Authenticating...");
-        progressDialog.show();
+//        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this,
+//                R.style.Theme_AppCompat_DayNight_DarkActionBar);
+//        progressDialog.setIndeterminate(true);
+//        progressDialog.setMessage("Authenticating...");
+//        progressDialog.show();
 
         // TODO: Implement your own authentication logic here.
+
+        checkAccount(editTextEmail.getText().toString(), editTextPassword.getText().toString());
+
+//        new Handler().postDelayed(
+//                new Runnable() {
+//                    public void run() {
+//                        // On complete call either onLoginSuccess or onLoginFailed
+//                        onLoginSuccess();
+//                        // onLoginFailed();
+////                        progressDialog.dismiss();
+//                    }
+//                }, 3000);
+    }
+
+    public void checkAccount(final String username, final String password) {
         myRefMember.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 boolean checkAccount = false;
                 boolean checkRole = false;
+                String nameStaff = "";
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     String e = snapshot.child("member_email").getValue().toString();
                     String p = snapshot.child("member_password").getValue().toString();
                     String r = snapshot.child("member_role").getValue().toString();
                     Log.d("checkLog1", e);
                     Log.d("checkLog2", editTextEmail.getText().toString());
-                    if (e.equals(editTextEmail.getText().toString()) && p.equals(editTextPassword.getText().toString())) {
+                    if (e.equals(username) && p.equals(password)) {
                         checkAccount = true;
                         if (r.equalsIgnoreCase("Administrator") || r.equalsIgnoreCase("Staff")) {
                             checkRole = true;
+                            nameStaff = snapshot.child("member_name").getValue().toString();
                         }
                         break;
                     }
                 }
                 if (checkAccount) {
                     if (checkRole) {
+                        SharedPreferences sharedPreferences = getSharedPreferences("SaveLogin", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("Username", nameStaff);
+                        editor.apply();
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(intent);
                     } else {
                         Toast.makeText(LoginActivity.this, "Bạn không có quyền truy cập!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(LoginActivity.this, LoginActivity.class);
-                        startActivity(intent);
                     }
                 } else {
                     Toast.makeText(LoginActivity.this, "Email hoặc mật khẩu không đúng!", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(LoginActivity.this, LoginActivity.class);
-                    startActivity(intent);
                 }
             }
 
@@ -107,16 +127,6 @@ public class LoginActivity extends AppCompatActivity {
 
             }
         });
-
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onLoginSuccess or onLoginFailed
-                        onLoginSuccess();
-                        // onLoginFailed();
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
     }
 
 
@@ -145,7 +155,6 @@ public class LoginActivity extends AppCompatActivity {
 
     public void onLoginFailed() {
         Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
-
         buttonLogin.setEnabled(true);
     }
 

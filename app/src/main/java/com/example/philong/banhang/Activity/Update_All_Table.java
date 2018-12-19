@@ -1,11 +1,15 @@
 package com.example.philong.banhang.Activity;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -18,10 +22,17 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.philong.banhang.Adapter.Adapter_Product_Update;
 import com.example.philong.banhang.Adapter.Adapter_Table;
 import com.example.philong.banhang.Adapter.Adapter_Update_Table;
+import com.example.philong.banhang.Objects.Product;
 import com.example.philong.banhang.Objects.Table;
 import com.example.philong.banhang.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,24 +46,30 @@ public class Update_All_Table extends AppCompatActivity {
 
     ArrayList<Table> tableArrayList = new ArrayList<>();
 
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference myRef = database.getReference("grace");
+    DatabaseReference myRefTable = myRef.child("table");
+
     Adapter_Update_Table adapter_table;
 
     RecyclerView recyclerviewAddTable;
 
     Button buttonInsertTable, buttonBack;
 
-    MainActivity mainActivity = new MainActivity();
-    String urlDeleteDataTable = mainActivity.urlIPAddress + "/GraceCoffee/deleteTable.php";
     //khai báo 2 thuộc tính để setup grid layout
     RecyclerView.LayoutManager recyclerViewLayoutManager;
     Context context;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_table);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("intent_bancanxoa"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver1, new IntentFilter("intent_bancansua"));
         AnhXa();
         XuLySuKien();
-        GetDataTable(MainActivity.urlGetDataTable);
+        GetDataTable();
         SetupRecyclerView();
     }
     void AnhXa(){
@@ -77,66 +94,70 @@ public class Update_All_Table extends AppCompatActivity {
     }
 
 
-    public void GetDataTable (String url){
-        RequestQueue requestQueue= Volley.newRequestQueue(this);
-        //GET để lấy xuống
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url,null,
-                new Response.Listener<JSONArray>() {
-                    @Override
-                    //khi doc duoc json
-                    public void onResponse(JSONArray response) {
-                        tableArrayList.clear();
-                        for (int i=0;i<response.length();i++){
-                            try {
-                                JSONObject object = response.getJSONObject(i);
-                                tableArrayList.add(new Table(
-                                        object.getInt("ID"),//trùng với định nghĩa contructor của php $this->ID
-                                        object.getString("Ten")
-                                ));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        adapter_table.notifyDataSetChanged();
-                    }
-                },
-                //khi doc json bi loi
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(Update_All_Table.this, error.toString(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-        requestQueue.add(jsonArrayRequest);
+    public void GetDataTable(){
+        myRefTable.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String table_name = snapshot.child("table_name").getValue().toString();
+                    String table_describe = snapshot.child("table_describe").getValue().toString();
+                    tableArrayList.add(new Table(table_name, table_describe));
+                }
 
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        adapter_table = new Adapter_Update_Table(tableArrayList,getApplicationContext(),this);
+        recyclerviewAddTable.setAdapter(adapter_table);
     }
 
-    public void DeleteTable(final int idban){
-        RequestQueue requestQueue= Volley.newRequestQueue(this);
-        StringRequest stringRequest=new StringRequest(Request.Method.POST, urlDeleteDataTable, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {//thực thi thành công quay về getdata
-                if(response.trim().equals("success")){
-                    Toast.makeText(Update_All_Table.this, "XoaThanhCong", Toast.LENGTH_SHORT).show();
-                    GetDataTable(MainActivity.urlGetDataTable);
-                }
-                else Toast.makeText(Update_All_Table.this, "loi xoa", Toast.LENGTH_SHORT).show();
-            }
+    String product_name = "";
+    int vitrixoa = 0;
+    public BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            product_name = intent.getStringExtra("ban");
+            vitrixoa = intent.getIntExtra("vitrixoa", 123);
+            DeleteTable(product_name, vitrixoa);
         }
-                , new Response.ErrorListener() {
+    };
+
+    public BroadcastReceiver mMessageReceiver1 = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String table_name = intent.getStringExtra("ban");
+            String table_des = intent.getStringExtra("mota");
+            Intent intent1 = new Intent(Update_All_Table.this, Update_All_Table_Update.class);
+            intent1.putExtra("ban", table_name);
+            intent1.putExtra("mota", table_des);
+            startActivity(intent1);
+        }
+    };
+
+    public void DeleteTable(final String name, final int vitrixoa){
+        myRefTable.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(Update_All_Table.this, "Loi xoa", Toast.LENGTH_SHORT).show();
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String key = snapshot.getKey();
+                    if (name.equalsIgnoreCase(snapshot.child("table_name").getValue().toString())) {
+                        myRefTable.child(key).removeValue();
+                        tableArrayList.remove(vitrixoa);
+                        adapter_table.notifyDataSetChanged();
+                        break;
+                    }
+                }
             }
-        }){
+
             @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params=new HashMap<>();
-                params.put("idTable", String.valueOf(idban));
-                return params;
+            public void onCancelled(DatabaseError databaseError) {
+
             }
-        };
-        requestQueue.add(stringRequest);
+        });
     }
 
     void SetupRecyclerView(){
@@ -150,5 +171,6 @@ public class Update_All_Table extends AppCompatActivity {
         adapter_table=new Adapter_Update_Table(tableArrayList,getApplicationContext(),this);
         recyclerviewAddTable.setAdapter(adapter_table);
     }
+
 
 }

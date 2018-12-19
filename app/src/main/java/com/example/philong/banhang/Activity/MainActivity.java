@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Handler;
@@ -73,27 +74,13 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity  {
-
-        //khai báo chuỗi kết nối
-        static String urlIPAddress = "http://192.168.199.2";
-        static String urlGetDataTable = urlIPAddress + "/GraceCoffee/getdataTable.php";
-        static String urlGetDataProduct = urlIPAddress + "/GraceCoffee/getdataProduct.php";
-        static String urlGetDataProductCoffee = urlIPAddress + "/GraceCoffee/getdataProductCoffee.php";
-        static String urlGetDataProductCannedWater = urlIPAddress + "/GraceCoffee/getdataProductCannedWater.php";
-        static String urlGetDataProductBottledWater = urlIPAddress + "/GraceCoffee/getdataProductBottledWater.php";
-        static String urlGetDataProductTea = urlIPAddress + "/GraceCoffee/getdataProductTea.php";
-        static String urlGetDataProductFruit = urlIPAddress + "/GraceCoffee/getdataProductFruit.php";
-        static String urlGetDataProductFastFood = urlIPAddress + "/GraceCoffee/getdataProductFastFood.php";
-        static String urlGetDataProductOther = urlIPAddress + "/GraceCoffee/getdataProductOther.php";
-
-        int percent = 0;
-
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference("grace");
         DatabaseReference myRefBill = myRef.child("bill");
         DatabaseReference myRefCategory = myRef.child("catalog");
         DatabaseReference myRefProduct = myRef.child("product");
         DatabaseReference myRefPromotion = myRef.child("promotion");
+        DatabaseReference myRefTable = myRef.child("table");
 
         static int count_notification = 0;
         static int count_stt = 1;
@@ -110,7 +97,7 @@ public class MainActivity extends AppCompatActivity  {
         public TextView txt_get_time,textViewNumberTable, textViewTotal, textViewThanhTien, textViewStaff, textViewStatus;
         public EditText editTextPercent, editTextPromotion, editTextGhiChu;
         Button btn_update_menu, btn_exit;
-        Button buttonMainPrint, buttonManagement;
+        Button buttonMainPrint, buttonManagement, buttonThongKe;
         NotificationBadge notiBadge;
         Button createBill;
         Handler mHandler;
@@ -154,15 +141,26 @@ public class MainActivity extends AppCompatActivity  {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("intent_tenmon"));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverPosition, new IntentFilter("intent_vitrixoabill"));
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverCategory, new IntentFilter("intent_category"));
-
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverKey, new IntentFilter("intent_key"));
 
 
         GetCategory(myRefCategory);
 
         SetupRecycerView();
-
+        GetDataTable();
         XuLyEvent();
         timer();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        String key = "";
+        Intent intent = getIntent();
+        key = intent.getStringExtra("key");
+        if (key!= null) {
+            getItemPopupMenu(key);
+        }
     }
 
     public void CreateFirebase() {
@@ -352,7 +350,14 @@ public class MainActivity extends AppCompatActivity  {
         txt_get_time=findViewById(R.id.text_view_getTime);
         textViewTotal = findViewById(R.id.text_view_toTal);
         textViewThanhTien = findViewById(R.id.text_view_thanhTien);
+
+        //get tên staff
         textViewStaff = findViewById(R.id.textView_Staff);
+        SharedPreferences sharedPreferences = getSharedPreferences("SaveLogin", Context.MODE_PRIVATE);
+        String name = sharedPreferences.getString("Username", "");
+        textViewStaff.setText(name);
+
+
         textViewStatus = findViewById(R.id.text_view_status);
         editTextPercent = findViewById(R.id.editText_perCent);
         editTextPromotion = findViewById(R.id.editText_promotion);
@@ -367,6 +372,7 @@ public class MainActivity extends AppCompatActivity  {
         btn_update_menu=findViewById(R.id.btn_update_menu);
         buttonMainPrint=findViewById(R.id.button_main_print);
         buttonManagement = findViewById(R.id.btn_management);
+        buttonThongKe = findViewById(R.id.btn_statistical);
 
     }
 
@@ -378,7 +384,7 @@ public class MainActivity extends AppCompatActivity  {
             @Override
             public void run() {
 //                txt_get_time.setText(String.valueOf(formattedDate));
-                GetDataTable(urlGetDataTable);
+//                GetDataTable(urlGetDataTable);
 //                checkOrderOnline();
                 mHandler.postDelayed(this,1000);
             }
@@ -397,11 +403,38 @@ public class MainActivity extends AppCompatActivity  {
 //        },1000,10000);
     }
 
+    public void GetDataTable() {
+        myRefTable.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String name = snapshot.child("table_name").getValue().toString();
+                    String des = snapshot.child("table_describe").getValue().toString();
+                    tableArrayList.add(new Table(name, des));
+                }
+                adapter_table = new Adapter_Table(tableArrayList, getApplicationContext(), MainActivity.this, textViewNumberTable);
+                recyclerView_table.setAdapter(adapter_table);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     public void XuLyEvent(){
         buttonManagement.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(MainActivity.this, QuanLyBillActivity.class));
+            }
+        });
+
+        buttonThongKe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, ThongKeActivity.class));
             }
         });
 
@@ -638,6 +671,14 @@ public class MainActivity extends AppCompatActivity  {
         }
     };
 
+    public BroadcastReceiver mMessageReceiverKey = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String key = intent.getStringExtra("key");
+            getItemPopupMenu(key);
+        }
+    };
+
     //lấy dữ liệu product theo mục category
     public void GetDataProduct(DatabaseReference myRef, final String category) {
         myRef.orderByChild("category_name").equalTo(category).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -861,39 +902,6 @@ public class MainActivity extends AppCompatActivity  {
         dialog.show();
     }
 
-    public void GetDataTable (String url){
-        RequestQueue requestQueue= Volley.newRequestQueue(this);
-        //GET để lấy xuống
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url,null,
-                new Response.Listener<JSONArray>() {
-                    @Override
-                    //khi doc duoc json
-                    public void onResponse(JSONArray response) {
-                        tableArrayList.clear();
-                        for (int i=0;i<response.length();i++){
-                            try {
-                                JSONObject object = response.getJSONObject(i);
-                                tableArrayList.add(new Table(
-                                        object.getInt("ID"),//trùng với định nghĩa contructor của php $this->ID
-                                        object.getString("Ten")
-                                ));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        adapter_table.notifyDataSetChanged();
-                    }
-                },
-                //khi doc json bi loi
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-        requestQueue.add(jsonArrayRequest);
-    }
-
     public void showPopupMenu(View v) {
         final PopupMenu popupMenu = new PopupMenu(MainActivity.this, v);
         popupMenu.inflate(R.menu.popup_menu_list_bill);
@@ -909,8 +917,8 @@ public class MainActivity extends AppCompatActivity  {
                         arrayListKey.add(snapshot.getKey());
 
                         String[] time = snapshot.child("date_create").getValue().toString().split(" ");
-                        String[] date = time[0].split("-");
-                        String billnumber = date[0] + date[1] + date[2];
+                        String key = snapshot.getKey();
+                        String billnumber = key.substring(key.length() - 5);
                         popupMenu.getMenu().add(0, arrayListKey.size(), 0, "HĐ: " + billnumber + " - " + time[1]);
                         break;
                     }
@@ -929,6 +937,9 @@ public class MainActivity extends AppCompatActivity  {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
+                    case R.id.itemAll:
+                        startActivity(new Intent(MainActivity.this, QuanLyBillActivity.class));
+                        return true;
                     case 1:
                         getItemPopupMenu(arrayListKey.get(0));
                         return true;
@@ -954,6 +965,7 @@ public class MainActivity extends AppCompatActivity  {
     static String customer_phone = "";
     static String customer_email = "";
     static String ghichu = "";
+
     public void getItemPopupMenu(final String key) {
         buttonMainPrint.setText("Xác nhận");
         createBill.setText("Thoát");
@@ -1126,4 +1138,5 @@ public class MainActivity extends AppCompatActivity  {
             }
         });
     }
+
 }
